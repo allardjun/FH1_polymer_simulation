@@ -1,0 +1,220 @@
+/*** Allard Lab jun.allard@uci.edu                    ***/
+
+#define TWISTER genrand_real3()
+#define NFILMAX         3
+#define NMAX            1201
+#define NTMAX           1e10
+#define NTADAPT         20000
+#define NTCHECK         200000
+#define DCHIMIN         1e-4
+#define NBINS           100
+#define NBINSPOLYMER    3000
+#define PI              3.14159265359
+#define INF             1e14
+#define DCHIINIT        0.1
+#define KSCRITICAL      0.002
+#define MEMBRANE        0
+#define ELECTRO         0
+#define HARDWALL        0
+#define BASEBOUND       0
+#define CPMAX           1e8
+#define TALKATIVE       1
+#define VISUALIZE       1
+#define BINDTRANSITION  0
+
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+#include "twister.c"
+
+
+/*******************************************************************************/
+//  GLOBAL VARIABLES
+/*******************************************************************************/
+
+/* General Global Variables */
+char listName[100];
+FILE *fList;
+
+char liveListName[100];
+
+//
+char paramsFilename[100];
+FILE *paramsFile, *filList, *iSiteList, *bSiteList, *basicSiteList;
+
+long NFil,N[NFILMAX];
+long Ntemp;
+long iSite[NFILMAX][NMAX], iSiteTotal[NFILMAX], iSiteCurrent, iy,ty, stericOcclusion[NFILMAX][NMAX];
+long NumberiSites;
+long Ncurrent;
+double c0, c1, irLigand;
+
+
+double ree[NFILMAX], rM[NFILMAX], rM2[NFILMAX], rMiSite[NFILMAX][NMAX], rM2iSite[NFILMAX][NMAX], rH[NFILMAX];
+
+double reeFil[NFILMAX][NFILMAX];
+
+long iseed;
+
+double phi[NFILMAX][NMAX], theta[NFILMAX][NMAX], psi[NFILMAX][NMAX];
+double phiPropose[NFILMAX][NMAX], thetaPropose[NFILMAX][NMAX], psiPropose[NFILMAX][NMAX];
+double r[NFILMAX][NMAX][3],t[NFILMAX][NMAX][3], e1[NFILMAX][NMAX][3], e2[NFILMAX][NMAX][3],
+       rBase[NFILMAX][3], tBase[NFILMAX][3], e1Base[NFILMAX][3], e2Base[NFILMAX][3],
+       rPropose[NFILMAX][NMAX][3],tPropose[NFILMAX][NMAX][3], e1Propose[NFILMAX][NMAX][3], e2Propose[NFILMAX][NMAX][3];
+double norm;
+double iLigandCenter[NFILMAX][NMAX][3];
+
+double RGlobal[3][3], RLocal[3][3];
+double e1_dot_t, e2_dot_t, e2_dot_e1;
+
+long st;
+long nf, nf2, nfPropose;
+long proposals[2], accepts[2], nt, iChi, i, iPropose, ix, iParam, ntNextStationarityCheck,i2, iStart;
+double E, ENew, rate[2], dChi[2], dChiHere, Force;
+long constraintProposalsTotal;
+
+long commandiSites;
+char *iSiteLocations;
+char input[4*NMAX];
+long j,m;
+int verboseTF;
+
+/* Convergence Global Variables */
+double ksStatistic[NFILMAX];
+long ntNextStationarityCheck, iBin;
+int convergedTF, constraintSatisfiedTF;
+long convergenceVariableCounts[NFILMAX][NBINS], convergenceVariableCountsPrevious[NFILMAX][NBINS];
+long polymerLocationCounts[NFILMAX][NMAX][NBINSPOLYMER];
+
+
+/* MULTIPLE Global Variables*/
+double brLigand;
+double bLigandCenter[NFILMAX][NMAX][3];
+long bSite[NFILMAX][NMAX], bSiteTotal[NFILMAX], bSiteCurrent, ib;
+
+double bLigandCenterPropose[NFILMAX][NMAX][3];
+
+double deliveryDistance;
+long stericOcclusionBase[NFILMAX];
+long membraneOcclusion[NFILMAX][NMAX], membraneAndSegmentOcclusion[NFILMAX][NMAX];
+int deliveryMethod;
+long boundToBaseDeliver[NFILMAX][NMAX];
+
+
+/* BASEBOUND Global Variables */
+double baserLigand;
+double baseLigandCenter[NFILMAX][3];
+double baseCenter[3];
+
+/* MULTIPLE FILAMENT Variables*/
+double baseSepDistance;
+
+/* Filament tail dimerization force */
+double dimerDistCurrent, dimerDist0;
+double kdimer;
+
+
+/*******************************************************************************/
+//  INCLUDES
+/*******************************************************************************/
+
+#include "outputControl.c"
+#include "getParameters.c"
+#include "getSites.c"
+#include "getFilaments.c"
+#include "metropolisJoint.c"
+
+
+/*******************************************************************************/
+//  MAIN
+/*******************************************************************************/
+
+// arguments: listName,
+int main( int argc, char *argv[] )
+{
+
+    if(argv[1]) //get name of parameters file
+        strcpy(paramsFilename,argv[1]);
+    if (TALKATIVE) printf("This is the parameter filename: %s\n", paramsFilename);
+
+    // use text file to set parameters
+    getParameters();
+
+    // use rest of command line input to overwrite parameters as necessary
+    if(argv[2])
+    {
+        if(atoi(argv[2])!=-1)
+            strcpy(listName,argv[2]);
+        if (TALKATIVE) printf("This is the output filename: %s\n", listName);
+        strcat(liveListName, "live_");
+        strcat(liveListName, listName);
+
+        if (TALKATIVE) printf("This is the liveoutput filename: %s\n", listName);
+
+    }
+
+    if(argv[3])
+    {
+        if(atoi(argv[3])!=-1)
+            verboseTF = atof(argv[3]);
+        if (TALKATIVE) printf("This will print verbose: %d\n", verboseTF);
+    }
+
+    if(argv[4])
+    {
+        if(atoi(argv[4])!=-1)
+            NFil = atof(argv[4]);
+        if (TALKATIVE) printf("This is the number of filaments: %ld\n", NFil);
+    }
+
+    if(argv[5])
+    {
+        if(atoi(argv[5])!=-1)
+            Ntemp = atof(argv[5]);
+        if (TALKATIVE) printf("This is the filament length: %ld\n", Ntemp);
+    }
+
+    if(argv[6])
+    {
+        if(atoi(argv[7])!=-1)
+            baseSepDistance = atof(argv[7]);
+        if (TALKATIVE) printf("This is the base separation distance: %lf\n", baseSepDistance);
+    }
+
+    if(argv[7])
+    {
+        if(atoi(argv[9])!=-1)
+            kdimer = atof(argv[9]);
+        if (TALKATIVE) printf("This is the dimerization force: %lf\n", kdimer);
+    }
+
+
+    /***********************************************************************************/
+    /********* INITIALIZE FILAMENTS, ISITES, BSITES, AND BASIC SITES *******************/
+    /***********************************************************************************/
+
+    // filaments
+    getFilaments();
+    printf("ran getFilaments\n");
+    // iSites, bSites
+    getSites();
+    printf("ran getSites\n");
+
+    /***********************************************************************************/
+    /******************************* FINISH INITIALIZING *******************************/
+
+    /***********************************************************************************/
+    // initialize random seed
+	iseed = RanInitReturnIseed(0);
+
+    /***********************************************************************************/
+    // run metropolis algorithm
+    printf("starting metropolisJoint\n");
+	metropolisJoint();
+
+	return 0;
+
+} // finished main

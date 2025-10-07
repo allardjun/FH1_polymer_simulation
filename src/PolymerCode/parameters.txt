@@ -1,0 +1,11 @@
+listName		outputTest
+NFil			2
+Ntemp			50
+baseSepDistance		35.5
+irLigand		8.33333
+brLigand		40
+baserLigand		4
+Force			0
+kdimer			10
+dimerDist0		1
+verboseTF		0
