@@ -179,15 +179,15 @@ int main( int argc, char *argv[] )
 
     if(argv[6])
     {
-        if(atoi(argv[7])!=-1)
-            baseSepDistance = atof(argv[7]);
+        if(atoi(argv[6])!=-1)
+            baseSepDistance = atof(argv[6]);
         if (TALKATIVE) printf("This is the base separation distance: %lf\n", baseSepDistance);
     }
 
     if(argv[7])
     {
-        if(atoi(argv[9])!=-1)
-            kdimer = atof(argv[9]);
+        if(atoi(argv[7])!=-1)
+            kdimer = atof(argv[7]);
         if (TALKATIVE) printf("This is the dimerization force: %lf\n", kdimer);
     }
 

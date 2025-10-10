@@ -540,7 +540,7 @@ void finalizeSummary(int reallyFinal)
         fList = fopen(listNameParams,"a");
 
         // formulas only work for identical filaments
-        fprintf(fList, "%d %d %d %ld %f %f",
+        fprintf(fList, "%d %d %ld %f %f",
                 MEMBRANE,   // 1
                 BASEBOUND,  // 2
                 NFil,       // 3
