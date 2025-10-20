@@ -18,5 +18,4 @@ gcc -O3 driveMetropolis.c -o metropolis.out -lm
 
 ./metropolis.out parameters.txt outputNonDimer.txt 0 2 50 35.5 0
 
-#./metropolis.out parameters.txt outputDimer.txt 0 2 50 35.5 10
 
