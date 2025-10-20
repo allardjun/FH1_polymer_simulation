@@ -2,8 +2,4 @@
 *.m~
 .vscode/
 *.mat
-polymerCodeVisual.png
-live_outputDimer.txt
-live_outputNonDimer.txt
-outputDimer.txt
-outputNonDimer.txt
+runs/myfiles
