@@ -42,6 +42,9 @@ Contains code to simulate FH1 domain polymer dynamics on the fast-timescale; Use
    Either open the MATLAB GUI and run ``visualizePolymerCodeQuick.m`` or run via command-line
 
    This will generate plots of 1) local effective concentration of each binding site at the origin (with theory overplotted) and 2) occlusion probability of each bindng site. The plots will be saved as polymerCodeVisualQuick.png in the ``runs/`` directory.
+    
+   Example output:
+   ![plot of local effective concentration ratio and occlusion probability ratio](runs/polymerCodeVisualQuick_example.png)
 
 #### Example 2: Simulating a short non-N-terminally dimerized and N-terminally dimerized FH1 domain
 
@@ -68,3 +71,6 @@ Contains code to simulate FH1 domain polymer dynamics on the fast-timescale; Use
    Either open the MATLAB GUI and run ``visualizePolymerCode.m`` or run via command-line
 
    This will generate plots of 1) the ratio (dimerized/undimerized) of local effective concentration of each binding site at the origin and 2) the ratio (dimerized/undimerized) occlusion probability of each bindng site. The plots will be saved as polymerCodeVisual.png in the ``runs/`` directory.
+
+   Example output:
+![plot of local effective concentration ratio and occlusion probability ratio](runs/polymerCodeVisual_example.png)
