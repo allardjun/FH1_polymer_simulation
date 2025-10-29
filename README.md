@@ -74,3 +74,12 @@ Contains code to simulate FH1 domain polymer dynamics on the fast-timescale; Use
 
    Example output:
 ![plot of local effective concentration ratio and occlusion probability ratio](runs/polymerCodeVisual_example.png)
+
+---
+
+Tested on:
+
+- Apple `clang` version 17.0.0 (clang-1700.0.13.3)
+- Target: `arm64-apple-darwin24.6.0`
+- Thread model: `posix`
+- On a MacBook M1, the `runPolymerCodeQuick` example took 11 minutes
